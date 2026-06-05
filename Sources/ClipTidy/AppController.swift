@@ -23,6 +23,30 @@ final class AppController: NSObject, NSApplicationDelegate {
         set { defaults.set(newValue.rawValue, forKey: modeKey) }
     }
 
+    private let terminalsOnlyKey = "terminalsOnly"
+
+    /// When true, auto-clean only fires for copies made from a terminal app,
+    /// so copies from text files, browsers, and other apps are left untouched.
+    /// Defaults to true.
+    private var terminalsOnly: Bool {
+        get { defaults.object(forKey: terminalsOnlyKey) == nil ? true : defaults.bool(forKey: terminalsOnlyKey) }
+        set { defaults.set(newValue, forKey: terminalsOnlyKey) }
+    }
+
+    /// Bundle identifiers treated as terminals. The frontmost app at copy time
+    /// is the source of the copy, so this is how we know where text came from.
+    private let terminalBundleIDs: Set<String> = [
+        "com.mitchellh.ghostty",   // Ghostty
+        "com.apple.Terminal",      // Apple Terminal
+        "com.googlecode.iterm2",   // iTerm2
+        "dev.warp.Warp-Stable",    // Warp
+        "org.alacritty",           // Alacritty
+        "net.kovidgoyal.kitty",    // kitty
+        "com.github.wez.wezterm",  // WezTerm
+        "co.zeit.hyper",           // Hyper
+        "org.tabby"                // Tabby
+    ]
+
     // MARK: - Lifecycle
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -78,6 +102,11 @@ final class AppController: NSObject, NSApplicationDelegate {
         auto.state = autoClean ? .on : .off
         menu.addItem(auto)
 
+        let termOnly = item("Auto-clean from Terminals Only", #selector(toggleTerminalsOnly))
+        termOnly.state = terminalsOnly ? .on : .off
+        termOnly.toolTip = "When on, only copies from a terminal are cleaned. Copies from text editors, browsers, and other apps are left untouched."
+        menu.addItem(termOnly)
+
         menu.addItem(.separator())
         menu.addItem(header("Mode"))
         for m in CleanMode.allCases {
@@ -132,6 +161,11 @@ final class AppController: NSObject, NSApplicationDelegate {
         buildMenu()
     }
 
+    @objc private func toggleTerminalsOnly() {
+        terminalsOnly.toggle()
+        buildMenu()
+    }
+
     @objc private func selectMode(_ sender: NSMenuItem) {
         if let raw = sender.representedObject as? String, let m = CleanMode(rawValue: raw) {
             mode = m
@@ -146,7 +180,7 @@ final class AppController: NSObject, NSApplicationDelegate {
     // MARK: - Clipboard
 
     private func startWatching() {
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
             self?.pollClipboard()
         }
     }
@@ -156,7 +190,14 @@ final class AppController: NSObject, NSApplicationDelegate {
         guard pb.changeCount != lastChangeCount else { return }
         lastChangeCount = pb.changeCount
         guard autoClean else { return }
+        if terminalsOnly && !copiedFromTerminal() { return }
         applyClean()
+    }
+
+    /// True when the frontmost app (the source of the copy) is a terminal.
+    private func copiedFromTerminal() -> Bool {
+        guard let id = NSWorkspace.shared.frontmostApplication?.bundleIdentifier else { return false }
+        return terminalBundleIDs.contains(id)
     }
 
     /// Reads the clipboard, cleans it with the current mode, and writes it

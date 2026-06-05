@@ -7,7 +7,7 @@ Copy something out of your terminal and paste it into Discord, Slack, or a doc, 
 ## What it does
 
 - **Clean Clipboard Now** rewrites whatever is currently on your clipboard. Copy the messy text, click the menu bar icon, choose Clean, then paste.
-- **Auto-clean on Copy** watches the clipboard while it is on. Every time you copy text, it gets cleaned automatically. Just copy and paste, nothing else to click.
+- **Auto-clean on Copy** watches the clipboard while it is on. Every time you copy text from a terminal, it gets cleaned automatically. Just copy and paste, nothing else to click. By default it only acts on copies made from a terminal app, so text you copy from anywhere else is untouched.
 
 Lives in the menu bar only. No Dock icon, no window.
 
@@ -63,11 +63,13 @@ The shortcuts use Carbon hot keys and need no Accessibility permission.
 
 ## A note on auto-clean
 
-Auto-clean rewrites the plain text of anything you copy, in the chosen mode, and keeps only the plain text. If you copy formatted content (for example styled text from a word processor) while auto-clean is on, the formatting is dropped. Turn auto-clean off when you do not want that, or use the manual **Clean Clipboard Now** instead. It is off by default.
+By default, auto-clean only touches copies that come from a terminal app (Ghostty, Terminal, iTerm, Warp, and others). Anything you copy from a text editor, browser, or any other app is left exactly as it was. ClipTidy knows the source because the frontmost app at the moment you copy is where the copy came from.
+
+Turn off **Auto-clean from Terminals Only** if you want auto-clean to apply to every copy instead. In that mode it keeps only the plain text, so formatting from styled copies is dropped. Either way, the manual **Clean Clipboard Now** and its shortcut always work no matter where the text came from.
 
 ## How it works
 
-A timer checks the clipboard's change count a few times a second. When it changes, ClipTidy reads the plain text, runs it through the selected cleaner, and writes it back, recording its own write so it never reprocesses itself. All the text transforms live in `Sources/ClipTidy/Cleaner.swift` and have no UI or clipboard dependencies, so they are easy to read, change, and reuse.
+A timer checks the clipboard's change count a few times a second. When it changes, ClipTidy reads the plain text, runs it through the selected cleaner, and writes it back, recording its own write so it never reprocesses itself. For auto-clean, it also checks the frontmost application's bundle identifier against a list of known terminals (see `terminalBundleIDs` in `AppController.swift`), which is how it tells terminal copies from everything else. All the text transforms live in `Sources/ClipTidy/Cleaner.swift` and have no UI or clipboard dependencies, so they are easy to read, change, and reuse.
 
 ## Contributing
 
