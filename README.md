@@ -8,6 +8,16 @@ A tiny macOS menu bar app that cleans messy copied text before you paste it.
 
 Copy something out of your terminal and paste it into Discord, Slack, or a doc, and it often arrives broken: lines snapped into rows, spaces padded onto every row, indentation that turns into a stray code block. ClipTidy fixes the clipboard so the paste lands clean.
 
+## Why I built this
+
+I run two healthcare companies in the Philippines, and over the past year I have spent more and more time in the terminal, learning to build alongside AI coding tools instead of only steering from a dashboard.
+
+That is where this came from. I would work an idea out in the terminal, a plan, a snippet, a few bullet points, then paste it to my team on Discord to talk it through. Every time, the paste landed broken. Lines chopped into rows. Spaces stuck to the front of each line. A clean three-line thought turned into noise nobody wanted to read.
+
+So I built ClipTidy. It notices when the thing I copied came from a terminal and tidies it before I paste. Copy, paste, done. Everything else I copy, from a doc, a browser, a text file, it leaves alone.
+
+Small problem, small tool. But it is the kind of friction that adds up, and fixing it myself was half the fun.
+
 ## What it does
 
 - **Clean Clipboard Now** rewrites whatever is currently on your clipboard. Copy the messy text, click the menu bar icon, choose Clean, then paste.
@@ -71,6 +81,10 @@ By default, auto-clean only touches copies that come from a terminal app (Ghostt
 
 Turn off **Auto-clean from Terminals Only** if you want auto-clean to apply to every copy instead. In that mode it keeps only the plain text, so formatting from styled copies is dropped. Either way, the manual **Clean Clipboard Now** and its shortcut always work no matter where the text came from.
 
+## Privacy
+
+ClipTidy runs entirely on your Mac. It reads the clipboard and checks which app is in front when you copy, and that is all. There is no network code, no analytics, and nothing ever leaves your machine. It needs no special permissions. The whole app is a few hundred lines you can read in one sitting.
+
 ## How it works
 
 A timer checks the clipboard's change count a few times a second. When it changes, ClipTidy reads the plain text, runs it through the selected cleaner, and writes it back, recording its own write so it never reprocesses itself. For auto-clean, it also checks the frontmost application's bundle identifier against a list of known terminals (see `terminalBundleIDs` in `AppController.swift`), which is how it tells terminal copies from everything else. All the text transforms live in `Sources/ClipTidy/Cleaner.swift` and have no UI or clipboard dependencies, so they are easy to read, change, and reuse.
@@ -84,6 +98,14 @@ Pull requests welcome. The whole app is three small Swift files:
 - `main.swift` is the entry point.
 
 Add a new cleaning mode by adding a case to `CleanMode` and a method in `Cleaner`. The menu builds itself from the enum.
+
+## About
+
+Built by Dennis, founder of SeriousMD and NowServing. If you want to see what my teams ship:
+
+- **[SeriousMD](https://seriousmd.com)**: EMR and practice management for doctors and clinics.
+- **[NowServing](https://nowserving.ph)**: find and book doctors across the Philippines.
+- **[NowExpress](https://nowexpress.ph)**: order medicine and get it delivered.
 
 ## License
 

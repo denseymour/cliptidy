@@ -206,7 +206,8 @@ final class AppController: NSObject, NSApplicationDelegate {
         let pb = NSPasteboard.general
         guard let original = pb.string(forType: .string), !original.isEmpty else { return }
         let cleaned = Cleaner.clean(original, mode: mode)
-        guard cleaned != original else { return }
+        // Never replace the clipboard with nothing, and skip no-op writes.
+        guard !cleaned.isEmpty, cleaned != original else { return }
         pb.clearContents()
         pb.setString(cleaned, forType: .string)
         lastChangeCount = pb.changeCount
