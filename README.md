@@ -50,6 +50,17 @@ The app is unsigned. The first time you open it, macOS may warn you. Right-click
 
 With auto-clean on, your flow is just: copy the messy text, paste it where you want it.
 
+## Keyboard shortcuts
+
+These work from anywhere, so you never need to find the menu bar icon (handy when the notch hides it):
+
+| Shortcut | Action |
+|----------|--------|
+| **Control + Option + Command + C** | Clean the clipboard now (plays a short sound) |
+| **Control + Option + Command + A** | Toggle auto-clean on or off (sound confirms the new state) |
+
+The shortcuts use Carbon hot keys and need no Accessibility permission.
+
 ## A note on auto-clean
 
 Auto-clean rewrites the plain text of anything you copy, in the chosen mode, and keeps only the plain text. If you copy formatted content (for example styled text from a word processor) while auto-clean is on, the formatting is dropped. Turn auto-clean off when you do not want that, or use the manual **Clean Clipboard Now** instead. It is off by default.

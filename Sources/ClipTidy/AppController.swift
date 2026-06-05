@@ -1,5 +1,6 @@
 import AppKit
 import ServiceManagement
+import Carbon.HIToolbox
 
 /// Owns the menu bar item, the preferences, and the clipboard watcher.
 final class AppController: NSObject, NSApplicationDelegate {
@@ -28,6 +29,37 @@ final class AppController: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         buildMenu()
         startWatching()
+        registerHotKeys()
+    }
+
+    // MARK: - Global hotkeys
+
+    /// These fire from anywhere, so the menu bar icon never has to be reachable
+    /// (useful when the notch hides it).
+    ///   Control + Option + Command + C  cleans the clipboard now.
+    ///   Control + Option + Command + A  toggles auto-clean on or off.
+    private func registerHotKeys() {
+        let mods = HotKeyCenter.Modifiers.control
+            | HotKeyCenter.Modifiers.option
+            | HotKeyCenter.Modifiers.command
+
+        HotKeyCenter.shared.register(keyCode: UInt32(kVK_ANSI_C), modifiers: mods) { [weak self] in
+            self?.cleanNowFromHotKey()
+        }
+        HotKeyCenter.shared.register(keyCode: UInt32(kVK_ANSI_A), modifiers: mods) { [weak self] in
+            self?.toggleAutoFromHotKey()
+        }
+    }
+
+    private func cleanNowFromHotKey() {
+        applyClean()
+        NSSound(named: "Pop")?.play()
+    }
+
+    private func toggleAutoFromHotKey() {
+        autoClean.toggle()
+        buildMenu()
+        NSSound(named: autoClean ? "Tink" : "Bottle")?.play()
     }
 
     // MARK: - Menu
