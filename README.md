@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/AppIcon.png" width="120" alt="ClipTidy icon">
+</p>
+
 # ClipTidy
 
 A tiny macOS menu bar app that cleans messy copied text before you paste it.

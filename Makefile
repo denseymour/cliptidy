@@ -15,6 +15,7 @@ app: build
 	mkdir -p $(BUNDLE)/Contents/Resources
 	cp $(BIN) $(BUNDLE)/Contents/MacOS/$(APP)
 	cp Resources/Info.plist $(BUNDLE)/Contents/Info.plist
+	cp Resources/AppIcon.icns $(BUNDLE)/Contents/Resources/AppIcon.icns
 	@echo "Built $(BUNDLE). Double-click it, or run 'make install'."
 
 # Build the bundle and copy it into /Applications.
