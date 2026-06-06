@@ -101,7 +101,7 @@ Add a new cleaning mode by adding a case to `CleanMode` and a method in `Cleaner
 
 ## About
 
-Built by Dennis, founder of SeriousMD and NowServing. If you want to see what my teams ship:
+Built by Dennis Seymour ([@denseymour](https://github.com/denseymour)), founder of SeriousMD and NowServing. If you want to see what my teams ship:
 
 - **[SeriousMD](https://seriousmd.com)**: EMR and practice management for doctors and clinics.
 - **[NowServing](https://nowserving.ph)**: find and book doctors across the Philippines.
