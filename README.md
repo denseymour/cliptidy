@@ -29,7 +29,8 @@ Lives in the menu bar only. No Dock icon, no window.
 
 | Mode | What it does | Best for |
 |------|--------------|----------|
-| **Join paragraphs** | Merges wrap-broken lines back into paragraphs, keeps blank lines as breaks | Chat messages, prose (the default) |
+| **Smart reflow** | Strips blockquote bars (`▌`, `>`), rejoins wrap-broken lines, keeps list items, blank lines, and URLs as real line breaks | Quoted AI answers, numbered lists, chat messages (the default) |
+| **Join paragraphs** | Merges wrap-broken lines back into paragraphs, keeps blank lines as breaks | Plain prose |
 | **Trim lines** | Strips leading and trailing spaces from every line, keeps line breaks | Lists, short snippets |
 | **One line** | Collapses everything into a single space-separated line | A URL or command split across rows |
 | **Code block** | Removes the terminal's left padding, keeps real indentation, wraps in ` ``` ` | Pasting code or logs into Discord |

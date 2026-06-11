@@ -19,7 +19,7 @@ final class AppController: NSObject, NSApplicationDelegate {
     }
 
     private var mode: CleanMode {
-        get { CleanMode(rawValue: defaults.string(forKey: modeKey) ?? "") ?? .joinParagraphs }
+        get { CleanMode(rawValue: defaults.string(forKey: modeKey) ?? "") ?? .smartReflow }
         set { defaults.set(newValue.rawValue, forKey: modeKey) }
     }
 
