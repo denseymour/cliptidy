@@ -5,3 +5,7 @@
 .swiftpm/
 xcuserdata/
 Package.resolved
+
+# Mac App Store signing artifacts (never commit these)
+*.pkg
+*.provisionprofile

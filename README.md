@@ -90,6 +90,24 @@ ClipTidy runs entirely on your Mac. It reads the clipboard and checks which app 
 
 A timer checks the clipboard's change count a few times a second. When it changes, ClipTidy reads the plain text, runs it through the selected cleaner, and writes it back, recording its own write so it never reprocesses itself. For auto-clean, it also checks the frontmost application's bundle identifier against a list of known terminals (see `terminalBundleIDs` in `AppController.swift`), which is how it tells terminal copies from everything else. All the text transforms live in `Sources/ClipTidy/Cleaner.swift` and have no UI or clipboard dependencies, so they are easy to read, change, and reuse.
 
+## Building for the Mac App Store
+
+ClipTidy is sandboxed and ready for the Mac App Store. Two targets:
+
+- `make mas-check` builds the app, signs it ad-hoc with the real sandbox
+  entitlements, launches it, and confirms macOS put it in a sandbox container.
+  Needs no Apple certificates, so it verifies sandbox readiness at any time.
+- `make mas` builds a universal, signed `ClipTidy.pkg` ready to upload to App
+  Store Connect. It needs an Apple distribution cert, a "3rd Party Mac Developer
+  Installer" cert, and a Mac App Store provisioning profile for `com.cliptidy.app`
+  saved as `Resources/ClipTidy_MAS.provisionprofile`. The script auto-detects the
+  certs and tells you exactly what is missing until the account setup is done.
+
+The sandbox (`Resources/ClipTidy.entitlements`) grants nothing beyond the
+defaults: no network, no file access, no device access. Clipboard access,
+reading the frontmost app's bundle id, Carbon hot keys, and the login item all
+work inside the standard sandbox.
+
 ## Contributing
 
 Pull requests welcome. The whole app is three small Swift files:

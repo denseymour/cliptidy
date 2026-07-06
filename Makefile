@@ -2,7 +2,7 @@ APP    = ClipTidy
 BUNDLE = $(APP).app
 BIN    = .build/release/$(APP)
 
-.PHONY: build app install run clean
+.PHONY: build app install run clean mas mas-check
 
 # Compile the release binary.
 build:
@@ -28,5 +28,14 @@ install: app
 run: build
 	$(BIN)
 
+# Build a signed installer package for the Mac App Store (needs Apple certs).
+mas:
+	./scripts/build-mas.sh
+
+# QA: prove the app still builds, signs, and runs under the App Sandbox.
+# Needs no Apple certs, so it runs today.
+mas-check:
+	./scripts/qa-sandbox.sh
+
 clean:
-	rm -rf .build $(BUNDLE)
+	rm -rf .build $(BUNDLE) $(APP).pkg

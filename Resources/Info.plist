@@ -9,7 +9,7 @@
     <key>CFBundleIdentifier</key>
     <string>com.cliptidy.app</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>1</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
     <key>CFBundleExecutable</key>
@@ -24,7 +24,11 @@
     <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>NSHumanReadableCopyright</key>
-    <string>MIT License</string>
+    <string>Copyright © 2026 Dennis Seymour. MIT License.</string>
 </dict>
 </plist>
