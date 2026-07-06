@@ -2,7 +2,7 @@ APP    = ClipTidy
 BUNDLE = $(APP).app
 BIN    = .build/release/$(APP)
 
-.PHONY: build app install run clean mas mas-check
+.PHONY: build app install run clean dmg release
 
 # Compile the release binary.
 build:
@@ -28,14 +28,13 @@ install: app
 run: build
 	$(BIN)
 
-# Build a signed installer package for the Mac App Store (needs Apple certs).
-mas:
-	./scripts/build-mas.sh
+# Build a downloadable ClipTidy.dmg locally (no publish).
+dmg:
+	./scripts/release.sh --no-publish
 
-# QA: prove the app still builds, signs, and runs under the App Sandbox.
-# Needs no Apple certs, so it runs today.
-mas-check:
-	./scripts/qa-sandbox.sh
+# Build ClipTidy.dmg and publish it to GitHub Releases (needs gh authed).
+release:
+	./scripts/release.sh
 
 clean:
-	rm -rf .build $(BUNDLE) $(APP).pkg
+	rm -rf .build $(BUNDLE) $(APP).dmg

@@ -39,23 +39,27 @@ Pick the mode from the menu. It applies to both the manual click and auto-clean.
 
 ## Install
 
-Requires macOS 13 or later and the Swift toolchain (install Xcode or the Command Line Tools).
+### Download (easiest)
+
+Grab the latest **ClipTidy.dmg** from the [Releases page](https://github.com/denseymour/cliptidy/releases/latest), open it, and drag ClipTidy to Applications. Requires macOS 13 or later.
+
+The app is not notarized, so the first time you open it macOS warns you. Right-click ClipTidy and choose **Open** (just once), or allow it under System Settings, Privacy and Security. A wand icon then appears in your menu bar.
+
+### Build from source
+
+Needs the Swift toolchain (install Xcode or the Command Line Tools).
 
 ```sh
-git clone <your-repo-url> cliptidy
+git clone https://github.com/denseymour/cliptidy.git
 cd cliptidy
 make install
 ```
 
-`make install` builds the app and copies it to `/Applications`. Open ClipTidy from Launchpad. A wand icon appears in your menu bar.
-
-Other targets:
+`make install` builds the app and copies it to `/Applications`. Other targets:
 
 - `make app` builds `ClipTidy.app` in the project folder without installing.
 - `make run` runs it straight from the build directory.
 - `make build` compiles the binary only.
-
-The app is unsigned. The first time you open it, macOS may warn you. Right-click the app and choose **Open**, or allow it under System Settings, Privacy and Security.
 
 ## Usage
 
@@ -90,24 +94,6 @@ ClipTidy runs entirely on your Mac. It reads the clipboard and checks which app 
 
 A timer checks the clipboard's change count a few times a second. When it changes, ClipTidy reads the plain text, runs it through the selected cleaner, and writes it back, recording its own write so it never reprocesses itself. For auto-clean, it also checks the frontmost application's bundle identifier against a list of known terminals (see `terminalBundleIDs` in `AppController.swift`), which is how it tells terminal copies from everything else. All the text transforms live in `Sources/ClipTidy/Cleaner.swift` and have no UI or clipboard dependencies, so they are easy to read, change, and reuse.
 
-## Building for the Mac App Store
-
-ClipTidy is sandboxed and ready for the Mac App Store. Two targets:
-
-- `make mas-check` builds the app, signs it ad-hoc with the real sandbox
-  entitlements, launches it, and confirms macOS put it in a sandbox container.
-  Needs no Apple certificates, so it verifies sandbox readiness at any time.
-- `make mas` builds a universal, signed `ClipTidy.pkg` ready to upload to App
-  Store Connect. It needs an Apple distribution cert, a "3rd Party Mac Developer
-  Installer" cert, and a Mac App Store provisioning profile for `com.cliptidy.app`
-  saved as `Resources/ClipTidy_MAS.provisionprofile`. The script auto-detects the
-  certs and tells you exactly what is missing until the account setup is done.
-
-The sandbox (`Resources/ClipTidy.entitlements`) grants nothing beyond the
-defaults: no network, no file access, no device access. Clipboard access,
-reading the frontmost app's bundle id, Carbon hot keys, and the login item all
-work inside the standard sandbox.
-
 ## Contributing
 
 Pull requests welcome. The whole app is three small Swift files:
@@ -117,6 +103,8 @@ Pull requests welcome. The whole app is three small Swift files:
 - `main.swift` is the entry point.
 
 Add a new cleaning mode by adding a case to `CleanMode` and a method in `Cleaner`. The menu builds itself from the enum.
+
+To cut a release: bump `CFBundleShortVersionString` in `Resources/Info.plist`, then run `make release`. It builds a universal `ClipTidy.dmg` and publishes it to GitHub Releases (`make dmg` builds it locally without publishing).
 
 ## About
 
