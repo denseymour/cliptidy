@@ -12,10 +12,10 @@ enum CleanMode: String, CaseIterable {
     var detail: String {
         switch self {
         case .smartReflow:    return "Strip quote bars, rejoin wrapped lines, keep list and paragraph breaks (best for chat)"
-        case .joinParagraphs: return "Merge wrap-broken lines into paragraphs"
-        case .trimLines:      return "Strip leading and trailing spaces, keep line breaks"
-        case .oneLine:        return "Collapse everything into a single line"
-        case .codeBlock:      return "Dedent and wrap in ``` for code and logs"
+        case .joinParagraphs: return "Strip quote bars, merge wrap-broken lines into paragraphs"
+        case .trimLines:      return "Strip quote bars and leading and trailing spaces, keep line breaks"
+        case .oneLine:        return "Strip quote bars, collapse everything into a single line"
+        case .codeBlock:      return "Strip quote bars, dedent, and wrap in ``` for code and logs"
         }
     }
 }
@@ -25,23 +25,29 @@ enum CleanMode: String, CaseIterable {
 enum Cleaner {
 
     static func clean(_ text: String, mode: CleanMode) -> String {
+        // Every mode starts from gutter-free text. A quote bar copied out of a
+        // terminal is never something you meant to keep, so no mode should make
+        // you clean it by hand afterwards. Code block keeps "> " because there
+        // it is usually a REPL prompt, not a quote.
+        let prepared = stripQuoteGutters(text, allowAngleBracket: mode != .codeBlock)
+
         switch mode {
-        case .smartReflow:    return smartReflow(text)
-        case .joinParagraphs: return joinParagraphs(text)
-        case .trimLines:      return trimLines(text)
-        case .oneLine:        return oneLine(text)
-        case .codeBlock:      return codeBlock(text)
+        case .smartReflow:    return smartReflow(prepared)
+        case .joinParagraphs: return joinParagraphs(prepared)
+        case .trimLines:      return trimLines(prepared)
+        case .oneLine:        return oneLine(prepared)
+        case .codeBlock:      return codeBlock(prepared)
         }
     }
 
-    /// Strips blockquote gutters, rejoins lines the terminal wrapped, and
-    /// keeps the breaks that carry meaning: list items, blank lines, URLs on
-    /// their own line, and a new sentence that starts after a finished one on
-    /// a line the terminal did not fill to the wrap width.
+    /// Rejoins lines the terminal wrapped and keeps the breaks that carry
+    /// meaning: list items, blank lines, URLs on their own line, and a new
+    /// sentence that starts after a finished one on a line the terminal did
+    /// not fill to the wrap width. Quote gutters are already gone by here.
     static func smartReflow(_ text: String) -> String {
         let physical = normalize(text)
             .components(separatedBy: "\n")
-            .map { stripTrailing(stripQuotePrefix($0)) }
+            .map { stripTrailing($0) }
 
         // The longest line approximates the terminal's wrap width. A line
         // close to it was almost certainly wrapped mid-thought, so a sentence
@@ -147,26 +153,77 @@ enum Cleaner {
         return "```\n" + dedented + "\n```"
     }
 
-    // MARK: - Smart reflow helpers
+    // MARK: - Quote gutters
 
-    /// Characters terminals and markdown use as a blockquote gutter.
-    private static let quoteMarks: Set<Character> = ["▌", "▍", "▎", "▏", "▕", "│", "┃", "❘", "❙", "❚", ">"]
+    /// Bar glyphs terminals and chat clients draw down the left of a quote.
+    private static let barMarks: Set<Character> = ["▌", "▍", "▎", "▏", "▐", "▕", "│", "┃", "║", "❘", "❙", "❚"]
 
-    /// Removes leading quote markers ("▌ ", "> ", nested combinations) along
-    /// with the padding before them and the single space after them, keeping
-    /// any further indentation so nested lists stay nested.
-    private static func stripQuotePrefix(_ line: String) -> String {
+    private static func isQuoteMark(_ c: Character, allowAngleBracket: Bool) -> Bool {
+        barMarks.contains(c) || (allowAngleBracket && c == ">")
+    }
+
+    /// Removes the quote gutter from every line that has one, along with the
+    /// padding the gutter carries. The padding is measured across the whole
+    /// selection and only the shared amount comes off, so a nested list inside
+    /// a quote stays nested. Lines with no gutter are left exactly as they are,
+    /// which is what makes a mixed copy (some quoted, some not) come out level.
+    private static func stripQuoteGutters(_ text: String, allowAngleBracket: Bool) -> String {
+        let lines = normalize(text).components(separatedBy: "\n")
+        let split = lines.map { splitQuotePrefix($0, allowAngleBracket: allowAngleBracket) }
+        guard split.contains(where: { $0.found }) else { return normalize(text) }
+
+        // Blank quoted lines ("▎" on its own) carry no padding to learn from.
+        let pads = split.filter { $0.found && !$0.body.isEmpty }.map(\.padding)
+        let sharedPad = pads.min() ?? 0
+
+        return zip(lines, split).map { original, piece -> String in
+            guard piece.found else { return original }
+            if piece.body.isEmpty { return "" }
+            return String(repeating: " ", count: max(0, piece.padding - sharedPad)) + piece.body
+        }.joined(separator: "\n")
+    }
+
+    /// Splits a line into its quote prefix and the rest. `padding` is the
+    /// whitespace that followed the last marker; `body` has that whitespace
+    /// already removed so the caller can decide how much to give back.
+    ///
+    /// A bar that shows up again inside the line is table or box art, not a
+    /// gutter ("│ Name │ Age │"), so those lines come back untouched. Markdown's
+    /// "> " gets no such veto because it never draws a table, and prose behind
+    /// it can legitimately contain another ">".
+    private static func splitQuotePrefix(
+        _ line: String,
+        allowAngleBracket: Bool
+    ) -> (body: String, padding: Int, found: Bool) {
         var rest = Substring(line)
+        var consumedBars: Set<Character> = []
+        var found = false
+        var padding = 0
+
         while true {
             var i = rest.startIndex
             while i < rest.endIndex, rest[i] == " " || rest[i] == "\t" { i = rest.index(after: i) }
-            guard i < rest.endIndex, quoteMarks.contains(rest[i]) else { break }
-            while i < rest.endIndex, quoteMarks.contains(rest[i]) { i = rest.index(after: i) }
-            if i < rest.endIndex, rest[i] == " " { i = rest.index(after: i) }
+            guard i < rest.endIndex, isQuoteMark(rest[i], allowAngleBracket: allowAngleBracket) else { break }
+
+            while i < rest.endIndex, isQuoteMark(rest[i], allowAngleBracket: allowAngleBracket) {
+                if barMarks.contains(rest[i]) { consumedBars.insert(rest[i]) }
+                i = rest.index(after: i)
+            }
+            found = true
+            padding = 0
+            while i < rest.endIndex, rest[i] == " " || rest[i] == "\t" {
+                padding += 1
+                i = rest.index(after: i)
+            }
             rest = rest[i...]
         }
-        return String(rest)
+
+        let body = stripTrailing(String(rest))
+        if body.contains(where: { consumedBars.contains($0) }) { return (line, 0, false) }
+        return (body, padding, found)
     }
+
+    // MARK: - Smart reflow helpers
 
     /// True for lines that begin a list item or heading: "1.", "12)", "a.",
     /// "B)", "-", "*", "•", "## ".

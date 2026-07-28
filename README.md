@@ -27,9 +27,16 @@ Lives in the menu bar only. No Dock icon, no window.
 
 ## Modes
 
+Every mode starts by removing the quote gutter: the bar a terminal or chat
+client draws down the left of a quoted block (`▎`, `▌`, `│`, `┃`, and friends,
+plus markdown's `>`), along with the padding it carries. Only the padding shared
+by every quoted line comes off, so a nested list inside a quote stays nested,
+and lines with no gutter are left alone so a mixed copy lands level. Code block
+keeps `>` because there it is usually a REPL prompt.
+
 | Mode | What it does | Best for |
 |------|--------------|----------|
-| **Smart reflow** | Strips blockquote bars (`▌`, `>`), rejoins wrap-broken lines, keeps list items, blank lines, and URLs as real line breaks | Quoted AI answers, numbered lists, chat messages (the default) |
+| **Smart reflow** | Rejoins wrap-broken lines, keeps list items, blank lines, and URLs as real line breaks | Quoted AI answers, numbered lists, chat messages (the default) |
 | **Join paragraphs** | Merges wrap-broken lines back into paragraphs, keeps blank lines as breaks | Plain prose |
 | **Trim lines** | Strips leading and trailing spaces from every line, keeps line breaks | Lists, short snippets |
 | **One line** | Collapses everything into a single space-separated line | A URL or command split across rows |
