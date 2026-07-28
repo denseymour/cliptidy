@@ -2,31 +2,31 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key>
-    <string>ClipTidy</string>
-    <key>CFBundleDisplayName</key>
-    <string>ClipTidy</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.cliptidy.app</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleExecutable</key>
-    <string>ClipTidy</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
-    <key>CFBundleIconName</key>
-    <string>AppIcon</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>LSApplicationCategoryType</key>
-    <string>public.app-category.productivity</string>
-    <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2026 Dennis Seymour. MIT License.</string>
+	<key>CFBundleDisplayName</key>
+	<string>ClipTidy</string>
+	<key>CFBundleExecutable</key>
+	<string>ClipTidy</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.cliptidy.app</string>
+	<key>CFBundleName</key>
+	<string>ClipTidy</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 Dennis Seymour. MIT License.</string>
 </dict>
 </plist>
